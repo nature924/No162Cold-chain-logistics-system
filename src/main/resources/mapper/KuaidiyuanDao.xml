@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.KuaidiyuanDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.wangdian_id as wangdianId
+        ,a.username as username
+        ,a.password as password
+        ,a.kuaidiyuan_name as kuaidiyuanName
+        ,a.kuaidiyuan_phone as kuaidiyuanPhone
+        ,a.kuaidiyuan_id_number as kuaidiyuanIdNumber
+        ,a.kuaidiyuan_photo as kuaidiyuanPhoto
+        ,a.sex_types as sexTypes
+        ,a.kuaidiyuan_email as kuaidiyuanEmail
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.KuaidiyuanView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,wangdian.wangdian_name as wangdianName
+        ,wangdian.lianxiren_name as lianxirenName
+        ,wangdian.lianxiren_phone as lianxirenPhone
+        ,wangdian.lianxiren_address as lianxirenAddress
+        ,wangdian.wangdian_types as wangdianTypes
+        ,wangdian.wangdian_content as wangdianContent
+
+        FROM kuaidiyuan  a
+        left JOIN wangdian wangdian ON a.wangdian_id = wangdian.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.wangdianId != null and params.wangdianId != ''">
+                and (
+                    a.wangdian_id = #{params.wangdianId}
+                )
+            </if>
+            <if test=" params.username != '' and params.username != null and params.username != 'null' ">
+                and a.username like CONCAT('%',#{params.username},'%')
+            </if>
+            <if test=" params.password != '' and params.password != null and params.password != 'null' ">
+                and a.password like CONCAT('%',#{params.password},'%')
+            </if>
+            <if test=" params.kuaidiyuanName != '' and params.kuaidiyuanName != null and params.kuaidiyuanName != 'null' ">
+                and a.kuaidiyuan_name like CONCAT('%',#{params.kuaidiyuanName},'%')
+            </if>
+            <if test=" params.kuaidiyuanPhone != '' and params.kuaidiyuanPhone != null and params.kuaidiyuanPhone != 'null' ">
+                and a.kuaidiyuan_phone like CONCAT('%',#{params.kuaidiyuanPhone},'%')
+            </if>
+            <if test=" params.kuaidiyuanIdNumber != '' and params.kuaidiyuanIdNumber != null and params.kuaidiyuanIdNumber != 'null' ">
+                and a.kuaidiyuan_id_number like CONCAT('%',#{params.kuaidiyuanIdNumber},'%')
+            </if>
+            <if test="params.sexTypes != null and params.sexTypes != ''">
+                and a.sex_types = #{params.sexTypes}
+            </if>
+            <if test=" params.kuaidiyuanEmail != '' and params.kuaidiyuanEmail != null and params.kuaidiyuanEmail != 'null' ">
+                and a.kuaidiyuan_email like CONCAT('%',#{params.kuaidiyuanEmail},'%')
+            </if>
+
+                <!-- 判断网点信息的id不为空 -->
+            <if test=" params.wangdianIdNotNull != '' and params.wangdianIdNotNull != null and params.wangdianIdNotNull != 'null' ">
+                and a.wangdian_id IS NOT NULL
+            </if>
+            <if test=" params.wangdianName != '' and params.wangdianName != null and params.wangdianName != 'null' ">
+                and wangdian.wangdian_name like CONCAT('%',#{params.wangdianName},'%')
+            </if>
+            <if test=" params.lianxirenName != '' and params.lianxirenName != null and params.lianxirenName != 'null' ">
+                and wangdian.lianxiren_name like CONCAT('%',#{params.lianxirenName},'%')
+            </if>
+            <if test=" params.lianxirenPhone != '' and params.lianxirenPhone != null and params.lianxirenPhone != 'null' ">
+                and wangdian.lianxiren_phone like CONCAT('%',#{params.lianxirenPhone},'%')
+            </if>
+            <if test=" params.lianxirenAddress != '' and params.lianxirenAddress != null and params.lianxirenAddress != 'null' ">
+                and wangdian.lianxiren_address like CONCAT('%',#{params.lianxirenAddress},'%')
+            </if>
+            <if test="params.wangdianTypes != null  and params.wangdianTypes != ''">
+                and wangdian.wangdian_types = #{params.wangdianTypes}
+            </if>
+
+            <if test=" params.wangdianContent != '' and params.wangdianContent != null and params.wangdianContent != 'null' ">
+                and wangdian.wangdian_content like CONCAT('%',#{params.wangdianContent},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

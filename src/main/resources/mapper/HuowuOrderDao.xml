@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.HuowuOrderDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.huowu_order_uuid_number as huowuOrderUuidNumber
+        ,a.address_id as addressId
+        ,a.huowu_id as huowuId
+        ,a.yonghu_id as yonghuId
+        ,a.huowu_order_types as huowuOrderTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.HuowuOrderView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,address.yonghu_id as addressYonghuId
+        ,address.address_name as addressName
+        ,address.address_phone as addressPhone
+        ,address.address_dizhi as addressDizhi
+        ,address.isdefault_types as isdefaultTypes
+        ,huowu.huowu_name as huowuName
+        ,huowu.huowu_uuid_number as huowuUuidNumber
+        ,huowu.huowu_photo as huowuPhoto
+        ,huowu.huowu_types as huowuTypes
+        ,huowu.huowu_content as huowuContent
+        ,huowu.huowu_delete as huowuDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM huowu_order  a
+        left JOIN address address ON a.address_id = address.id
+        left JOIN huowu huowu ON a.huowu_id = huowu.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.huowuOrderUuidNumber != '' and params.huowuOrderUuidNumber != null and params.huowuOrderUuidNumber != 'null' ">
+                and a.huowu_order_uuid_number like CONCAT('%',#{params.huowuOrderUuidNumber},'%')
+            </if>
+            <if test="params.addressId != null and params.addressId != ''">
+                and (
+                    a.address_id = #{params.addressId}
+                )
+            </if>
+            <if test="params.huowuId != null and params.huowuId != ''">
+                and (
+                    a.huowu_id = #{params.huowuId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.huowuOrderTypes != null and params.huowuOrderTypes != ''">
+                and a.huowu_order_types = #{params.huowuOrderTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断收货地址的id不为空 -->
+            <if test=" params.addressIdNotNull != '' and params.addressIdNotNull != null and params.addressIdNotNull != 'null' ">
+                and a.address_id IS NOT NULL
+            </if>
+            <if test=" params.addressName != '' and params.addressName != null and params.addressName != 'null' ">
+                and address.address_name like CONCAT('%',#{params.addressName},'%')
+            </if>
+            <if test=" params.addressPhone != '' and params.addressPhone != null and params.addressPhone != 'null' ">
+                and address.address_phone like CONCAT('%',#{params.addressPhone},'%')
+            </if>
+            <if test=" params.addressDizhi != '' and params.addressDizhi != null and params.addressDizhi != 'null' ">
+                and address.address_dizhi like CONCAT('%',#{params.addressDizhi},'%')
+            </if>
+            <if test="params.isdefaultTypes != null  and params.isdefaultTypes != ''">
+                and address.isdefault_types = #{params.isdefaultTypes}
+            </if>
+
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(address.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(address.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test=" params.updateTimeStart != '' and params.updateTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(address.update_time) >= UNIX_TIMESTAMP(#{params.updateTimeStart}) ]]>
+            </if>
+            <if test=" params.updateTimeEnd != '' and params.updateTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(address.update_time) <= UNIX_TIMESTAMP(#{params.updateTimeEnd}) ]]>
+            </if>
+                <!-- 判断货物的id不为空 -->
+            <if test=" params.huowuIdNotNull != '' and params.huowuIdNotNull != null and params.huowuIdNotNull != 'null' ">
+                and a.huowu_id IS NOT NULL
+            </if>
+            <if test=" params.huowuName != '' and params.huowuName != null and params.huowuName != 'null' ">
+                and huowu.huowu_name like CONCAT('%',#{params.huowuName},'%')
+            </if>
+            <if test=" params.huowuUuidNumber != '' and params.huowuUuidNumber != null and params.huowuUuidNumber != 'null' ">
+                and huowu.huowu_uuid_number like CONCAT('%',#{params.huowuUuidNumber},'%')
+            </if>
+            <if test="params.huowuTypes != null  and params.huowuTypes != ''">
+                and huowu.huowu_types = #{params.huowuTypes}
+            </if>
+
+            <if test=" params.huowuContent != '' and params.huowuContent != null and params.huowuContent != 'null' ">
+                and huowu.huowu_content like CONCAT('%',#{params.huowuContent},'%')
+            </if>
+            <if test="params.huowuDeleteStart != null  and params.huowuDeleteStart != '' ">
+                <![CDATA[  and huowu.huowu_delete >= #{params.huowuDeleteStart}   ]]>
+            </if>
+            <if test="params.huowuDeleteEnd != null  and params.huowuDeleteEnd != '' ">
+                <![CDATA[  and huowu.huowu_delete <= #{params.huowuDeleteEnd}   ]]>
+            </if>
+            <if test="params.huowuDelete != null  and params.huowuDelete != '' ">
+                and huowu.huowu_delete = #{params.huowuDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huowu.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huowu.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

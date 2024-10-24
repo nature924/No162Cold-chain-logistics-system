@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.HuowuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.huowu_name as huowuName
+        ,a.huowu_uuid_number as huowuUuidNumber
+        ,a.huowu_photo as huowuPhoto
+        ,a.huowu_types as huowuTypes
+        ,a.huowu_content as huowuContent
+        ,a.huowu_delete as huowuDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.HuowuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM huowu  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.huowuName != '' and params.huowuName != null and params.huowuName != 'null' ">
+                and a.huowu_name like CONCAT('%',#{params.huowuName},'%')
+            </if>
+            <if test=" params.huowuUuidNumber != '' and params.huowuUuidNumber != null and params.huowuUuidNumber != 'null' ">
+                and a.huowu_uuid_number like CONCAT('%',#{params.huowuUuidNumber},'%')
+            </if>
+            <if test="params.huowuTypes != null and params.huowuTypes != ''">
+                and a.huowu_types = #{params.huowuTypes}
+            </if>
+            <if test=" params.huowuContent != '' and params.huowuContent != null and params.huowuContent != 'null' ">
+                and a.huowu_content like CONCAT('%',#{params.huowuContent},'%')
+            </if>
+            <if test="params.huowuDeleteStart != null and params.huowuDeleteStart != ''">
+                <![CDATA[  and a.huowu_delete >= #{params.huowuDeleteStart}   ]]>
+            </if>
+            <if test="params.huowuDeleteEnd != null and params.huowuDeleteEnd != ''">
+                <![CDATA[  and a.huowu_delete <= #{params.huowuDeleteEnd}   ]]>
+            </if>
+             <if test="params.huowuDelete != null and params.huowuDelete != ''">
+                and a.huowu_delete = #{params.huowuDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

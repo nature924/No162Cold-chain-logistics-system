@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.HuowuFenpeiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.huowu_order_id as huowuOrderId
+        ,a.kuaidiyuan_id as kuaidiyuanId
+        ,a.huowu_order_fenpei_types as huowuOrderFenpeiTypes
+        ,a.fenpei_wendu as fenpeiWendu
+        ,a.fenpei_time as fenpeiTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.HuowuFenpeiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,huowuOrder.huowu_order_uuid_number as huowuOrderUuidNumber
+        ,huowuOrder.yonghu_id as huowuOrderYonghuId
+        ,huowuOrder.huowu_order_types as huowuOrderTypes
+        ,kuaidiyuan.kuaidiyuan_name as kuaidiyuanName
+        ,kuaidiyuan.kuaidiyuan_phone as kuaidiyuanPhone
+        ,kuaidiyuan.kuaidiyuan_id_number as kuaidiyuanIdNumber
+        ,kuaidiyuan.kuaidiyuan_photo as kuaidiyuanPhoto
+        ,kuaidiyuan.kuaidiyuan_email as kuaidiyuanEmail
+
+        FROM huowu_fenpei  a
+        left JOIN huowu_order huowuOrder ON a.huowu_order_id = huowuOrder.id
+        left JOIN kuaidiyuan kuaidiyuan ON a.kuaidiyuan_id = kuaidiyuan.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.huowuOrderId != null and params.huowuOrderId != ''">
+                and (
+                    a.huowu_order_id = #{params.huowuOrderId}
+                )
+            </if>
+            <if test="params.kuaidiyuanId != null and params.kuaidiyuanId != ''">
+                and (
+                    a.kuaidiyuan_id = #{params.kuaidiyuanId}
+                )
+            </if>
+            <if test="params.huowuOrderFenpeiTypes != null and params.huowuOrderFenpeiTypes != ''">
+                and a.huowu_order_fenpei_types = #{params.huowuOrderFenpeiTypes}
+            </if>
+            <if test="params.fenpeiWenduStart != null and params.fenpeiWenduStart != ''">
+                <![CDATA[  and a.fenpei_wendu >= #{params.fenpeiWenduStart}   ]]>
+            </if>
+            <if test="params.fenpeiWenduEnd != null and params.fenpeiWenduEnd != ''">
+                <![CDATA[  and a.fenpei_wendu <= #{params.fenpeiWenduEnd}   ]]>
+            </if>
+             <if test="params.fenpeiWendu != null and params.fenpeiWendu != ''">
+                and a.fenpei_wendu = #{params.fenpeiWendu}
+             </if>
+            <if test=" params.fenpeiTimeStart != '' and params.fenpeiTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.fenpei_time) >= UNIX_TIMESTAMP(#{params.fenpeiTimeStart}) ]]>
+            </if>
+            <if test=" params.fenpeiTimeEnd != '' and params.fenpeiTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.fenpei_time) <= UNIX_TIMESTAMP(#{params.fenpeiTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断货物订单的id不为空 -->
+            <if test=" params.huowuOrderIdNotNull != '' and params.huowuOrderIdNotNull != null and params.huowuOrderIdNotNull != 'null' ">
+                and a.huowu_order_id IS NOT NULL
+            </if>
+            <if test=" params.huowuOrderUuidNumber != '' and params.huowuOrderUuidNumber != null and params.huowuOrderUuidNumber != 'null' ">
+                and huowuOrder.huowu_order_uuid_number like CONCAT('%',#{params.huowuOrderUuidNumber},'%')
+            </if>
+            <if test="params.addressId != null  and params.addressId != ''">
+                and huowuOrder.address_id = #{params.addressId}
+            </if>
+            <if test="params.huowuId != null  and params.huowuId != ''">
+                and huowuOrder.huowu_id = #{params.huowuId}
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and huowuOrder.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test="params.huowuOrderTypes != null  and params.huowuOrderTypes != ''">
+                and huowuOrder.huowu_order_types = #{params.huowuOrderTypes}
+            </if>
+
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huowuOrder.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huowuOrder.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断快递员的id不为空 -->
+            <if test=" params.kuaidiyuanIdNotNull != '' and params.kuaidiyuanIdNotNull != null and params.kuaidiyuanIdNotNull != 'null' ">
+                and a.kuaidiyuan_id IS NOT NULL
+            </if>
+            <if test="params.wangdianId != null  and params.wangdianId != ''">
+                and kuaidiyuan.wangdian_id = #{params.wangdianId}
+            </if>
+            <if test=" params.kuaidiyuanName != '' and params.kuaidiyuanName != null and params.kuaidiyuanName != 'null' ">
+                and kuaidiyuan.kuaidiyuan_name like CONCAT('%',#{params.kuaidiyuanName},'%')
+            </if>
+            <if test=" params.kuaidiyuanPhone != '' and params.kuaidiyuanPhone != null and params.kuaidiyuanPhone != 'null' ">
+                and kuaidiyuan.kuaidiyuan_phone like CONCAT('%',#{params.kuaidiyuanPhone},'%')
+            </if>
+            <if test=" params.kuaidiyuanIdNumber != '' and params.kuaidiyuanIdNumber != null and params.kuaidiyuanIdNumber != 'null' ">
+                and kuaidiyuan.kuaidiyuan_id_number like CONCAT('%',#{params.kuaidiyuanIdNumber},'%')
+            </if>
+            <if test=" params.kuaidiyuanEmail != '' and params.kuaidiyuanEmail != null and params.kuaidiyuanEmail != 'null' ">
+                and kuaidiyuan.kuaidiyuan_email like CONCAT('%',#{params.kuaidiyuanEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
